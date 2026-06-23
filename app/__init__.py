@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 from app.config import Config
 from app.extensions import db
+from app.routes import register_blueprints
 from sqlalchemy.exc import OperationalError, ProgrammingError
 
 def create_app():
@@ -8,6 +9,7 @@ def create_app():
     app.config.from_object(Config)
     db.init_app(app)
     from app.models import Student
+    register_blueprints(app)
     
     @app.errorhandler(OperationalError)
     def handle_operational_error(err):

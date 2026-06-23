@@ -2,6 +2,12 @@ from flask import jsonify, request
 from app.extensions import db
 from app.models.register_model import Student
 
+from werkzeug.security import generate_password_hash
+
+def set_password(propPassword):
+        password = generate_password_hash(propPassword)
+        return password
+
 def _validate_student_payload(data, student_id=None):
     errors = []
     if not data:
@@ -19,6 +25,26 @@ def _validate_student_payload(data, student_id=None):
     return errors
 
 
+def set_password(propPassword):
+        password = generate_password_hash(propPassword)
+        return password
+
+def _validate_student_payload(data, student_id=None):
+    errors = []
+    if not data:
+        return ["Request body is required."]
+
+    email = data.get("email")
+    if email is None or str(email).strip() == "":
+        errors.append("email is required.")
+    elif str(email).strip():
+        q = Student.query.filter(Student.email == str(email).strip())
+        if student_id:
+            q = q.filter(Student.id != student_id)
+        if q.first():
+            errors.append("Email address already exists.")
+    return errors
+
 def create_student():
     data = request.get_json(silent=True)
     if not data:
@@ -29,7 +55,7 @@ def create_student():
     try:
         student = Student(
             email=data.get("email").strip(),
-            password=data.get("password").strip()
+            password=set_password(data.get("password")).strip()
             
         )
         db.session.add(student)
